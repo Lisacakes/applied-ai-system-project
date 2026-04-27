@@ -1,0 +1,6 @@
+{"task": "Morning walk", "reason": "UNSAFE (AI Connection Error - Failing closed)", "pet": "Lori"}
+{"task": "Give Lori a grape", "reason": "UNSAFE (Deterministic Block): Grape is toxic to dogs.", "pet": "Lori"}
+{"task": "Give Lori a  bath", "reason": "UNSAFE (AI Connection Error - Failing closed)", "pet": "Lori"}
+{"task": "Give Lori a bath", "reason": "UNSAFE (AI Connection Error: 404 models/gemini-1.5-flash is not found for API v...)", "pet": "Lori"}
+{"task": "Give Lori grapes", "reason": "UNSAFE (Deterministic Block): Grapes is toxic.", "pet": "Lori"}
+{"task": "Take Lori on walk", "reason": "UNSAFE (AI Connection Error: 404 models/gemini-1.5-flash-latest is not fou...)", "pet": "Lori"}

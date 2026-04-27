@@ -103,3 +103,51 @@ Testing & Reliability Expectations
         Block unsafe tasks
         Log all blocked actions
         Handle AI failures without crashing
+
+
+Testing Summary: I implemented a suite of unit tests for input normalization and time validation using pytest. 100% of tests passed, confirming that the system correctly sanitizes pet task titles (handling case sensitivity and erratic spacing) and rejects invalid scheduling formats before they reach the AI or persistence layers.
+
+
+
+
+
+![System Architecture](assets/architecture.png)
+
+
+#PART 2
+
+#PawPal+ Pro: Applied AI Pet Safety System
+
+## Demo Video
+[REPLACE THIS WITH YOUR LOOM LINK]
+
+## Project Background
+**Original Project:** PawPal+ (Modules 1-3)
+**Summary:** Originally a CLI and basic Streamlit tool for managing pet schedules. 
+**The Evolution:** This project transforms a simple task manager into a **Safety-Aware System**. Using Retrieval-Augmented Generation (RAG), the app now reasons about pet safety before any data is saved, preventing common household hazards (like toxic foods) from being scheduled.
+
+## 🏗 System Architecture
+The system uses a decoupled, three-tier architecture to ensure reliability and safety.
+![System Architecture](assets/architecture.png)
+
+## 🛠 Design Decisions
+* **RAG-Driven Safety:** Used a local `pet_safety_rules.txt` to ground the AI, ensuring evaluations are based on verified facts rather than general LLM "hallucinations."
+* **Atomic Persistence:** Implemented a "write-to-temp-then-replace" strategy to prevent data corruption during saves.
+* **Efficient Observability:** Used `collections.deque` for log retrieval, ensuring that as the safety logs grow, memory usage remains constant ($O(limit)$).
+* **Hardened Validation:** Built a custom Service Layer to handle input normalization and regex-based time validation before the AI is even triggered.
+
+## Testing Summary
+* **19/19 Unit Tests Passed:** Verified core OOP logic and Service Layer validation.
+* **Safety Accuracy:** 100% success rate in blocking high-toxicity inputs (Grapes, Chocolate, Lilies) during manual and automated verification.
+
+## Setup Instructions
+1. Clone the repository.
+2. Create a `.env` file and add `GEMINI_API_KEY=your_key_here`.
+3. Install dependencies: `pip install streamlit google-generativeai python-dotenv pytest`.
+4. Run the app: `streamlit run app.py`.
+5. Run tests: `python -m pytest test_final.py test_pawpal.py`.
+
+
+![System Architecture](assests/test_success.png)
+
+

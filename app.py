@@ -1,79 +1,131 @@
 import streamlit as st
-import os
-import time
+import os, time
 from services import PetService
 from ai_helper import PetSafetyAI
-from pawpal_system import Owner, Task
+from pawpal_system import Owner, Pet, Task, Scheduler
 
+# Configuration for data storage
 DATA_FILE, LOG_FILE = "data.json", "blocked_log.json"
-st.set_page_config(page_title="PawPal+ Pro", page_icon="")
+st.set_page_config(page_title="PawPal+ Pro", page_icon="🐾", layout="wide")
 
-@st.cache_data(show_spinner=False)
-def load_logs_cached(file_path: str, version_token: float):
-    return PetService.get_tail_logs(file_path)
+@st.cache_data
+def load_logs(path, ver):
+    """Retrieves the last 20 safety audit logs."""
+    return PetService.get_tail_logs(path)
 
-# --- 1. State Initialization ---
-if "owner" not in st.session_state and os.path.exists(DATA_FILE):
-    try:
-        st.session_state.owner = Owner.load_from_json(DATA_FILE)
-    except Exception as e:
-        st.sidebar.error(f"Data Recovery Failed: {e}")
+# --- 1. DATA INITIALIZATION ---
+# Checks if an owner already exists in the JSON database
+if "owner" not in st.session_state:
+    if os.path.exists(DATA_FILE):
+        try:
+            st.session_state.owner = Owner.load_from_json(DATA_FILE)
+        except:
+            st.session_state.owner = None
+    else:
+        st.session_state.owner = None
 
-owner = st.session_state.get("owner")
-
-if "safety_ai" not in st.session_state:
-    try:
-        st.session_state.safety_ai = PetSafetyAI()
-    except Exception as e:
-        st.session_state.safety_ai = None
-        st.sidebar.error(f"AI Safety System Offline: {e}")
+# Initializes the AI layer once per session
+if "ai" not in st.session_state:
+    st.session_state.ai = PetSafetyAI()
 
 st.title("PawPal+ Pro")
 
-if owner and owner.pets:
-    with st.form("task_entry", clear_on_submit=True):
-        p_name = st.selectbox("Pet", [p.name for p in owner.pets])
-        title_raw = st.text_input("Task Title").strip()
-        t_time = st.text_input("Time (HH:MM)", "08:00")
-        
-        ai = st.session_state.get("safety_ai")
-        bypass = False
-        if not ai:
-            st.warning("Safety System Offline.")
-            bypass = st.checkbox("Manual Bypass")
+# --- 2. REGISTRATION (Initial Setup) ---
+# If no owner is found, force the user to register
+if not st.session_state.owner:
+    st.info("Welcome! Create your profile to begin.")
+    with st.form("reg"):
+        o_name = st.text_input("Owner Name", "Lisa")
+        p_name = st.text_input("Pet Name", "Lori")
+        p_spec = st.selectbox("Species", ["Dog", "Cat", "Other"])
+        if st.form_submit_button("Register"):
+            new_owner = Owner(name=o_name)
+            new_owner.add_pet(Pet(name=p_name, species=p_spec))
+            new_owner.save_to_json(DATA_FILE)
+            st.session_state.owner = new_owner
+            st.rerun()
+    st.stop()
 
-        if st.form_submit_button("Add Task"):
-            is_valid, err, title = PetService.validate_and_normalize(title_raw, t_time)
+owner = st.session_state.owner
+
+# --- 3. SIDEBAR (Manage Pets) ---
+# Allows the user to add multiple pets like Cami
+with st.sidebar:
+    st.header("🐾 My Pets")
+    for p in owner.pets:
+        st.write(f"**{p.name}** ({p.species})")
+    
+    st.divider()
+    if not st.session_state.ai.rules_loaded:
+        st.warning("⚠️ RAG Layer Offline: Using Hard Rules only.")
+    
+    with st.expander("➕ Add Another Pet"):
+        with st.form("add_pet_form", clear_on_submit=True):
+            new_p_name = st.text_input("Pet Name")
+            new_p_spec = st.selectbox("Species", ["Dog", "Cat", "Bird", "Other"], key="new_spec")
+            if st.form_submit_button("Add Pet"):
+                if new_p_name:
+                    owner.add_pet(Pet(name=new_p_name, species=new_p_spec))
+                    PetService.atomic_save(owner.to_dict(), DATA_FILE)
+                    st.success(f"Added {new_p_name}!")
+                    st.rerun()
+
+# --- 4. MAIN TASK UI ---
+with st.form("task"):
+    p_sel = st.selectbox("Select Pet", [x.name for x in owner.pets])
+    title_in = st.text_input("What is the task? (e.g., Give Lori grapes)").strip()
+    t_in = st.text_input("Time (HH:MM)", "08:00")
+    d_in = st.number_input("Duration (mins)", 1, 480, 30)
+
+    if st.form_submit_button("Add to Schedule"):
+        # Basic field validation
+        ok, err, norm = PetService.validate_and_normalize(title_in, t_in, d_in)
+        if not ok:
+            st.error(err)
+        else:
+            pet = owner.get_pet(p_sel)
+            ai = st.session_state.ai
             
-            if not is_valid:
-                st.error(err)
+            # The Safety Gatekeeper
+            res = ai.check_task_safety(norm) if ai else "SAFE"
+            
+            # THE FINAL GATE: Deterministic strictness
+            if res.strip().upper() == "SAFE":
+                pet.add_task(Task(title_in, t_in, d_in))
+                PetService.atomic_save(owner.to_dict(), DATA_FILE)
+                st.success(f"Added '{title_in}'!")
+                st.rerun()
             else:
-                pet = owner.get_pet(p_name)
-                if any(t.title.lower() == title and t.time == t_time for t in pet.tasks):
-                    st.error("Duplicate task detected.")
-                else:
-                    try:
-                        raw_res = str(ai.check_task_safety(title) if ai else "OFFLINE").strip()
-                    except Exception as e:
-                        raw_res = f"AI_ERROR: {str(e)}"
-                    
-                    is_safe = raw_res.upper().startswith("SAFE")
-                    is_err = raw_res == "OFFLINE" or raw_res.startswith("AI_ERROR")
-                    
-                    if is_safe or (bypass and is_err):
-                        pet.add_task(Task(title=title_raw, time=t_time))
-                        PetService.atomic_save(owner.to_dict(), DATA_FILE)
-                        st.success(f"Added '{title_raw}'!")
-                        st.rerun()
-                    else:
-                        log_entry = {"task": title_raw, "reason": raw_res, "pet": p_name}
-                        PetService.append_log(log_entry, LOG_FILE)
-                        st.session_state["log_ver"] = time.time()
-                        st.error(f"Blocked: {raw_res}")
+                # Log and block everything that isn't SAFE
+                PetService.append_log({"task": title_in, "reason": res, "pet": p_sel}, LOG_FILE)
+                st.session_state["log_ver"] = time.time()
+                st.error(f"🛑 {res}")
 
-# --- Observability Dashboard ---
-log_ver = st.session_state.get("log_ver", 0)
-logs = load_logs_cached(LOG_FILE, log_ver)
+# --- 5. SCHEDULE VIEW ---
+st.divider()
+st.subheader("Daily Schedule")
+sched = Scheduler(owner)
+all_tasks = sched.get_all_sorted()
+
+if not all_tasks:
+    st.info("No tasks scheduled yet.")
+else:
+    for pet, task in all_tasks:
+        c1, c2, c3, c4 = st.columns([1, 3, 1, 1])
+        c1.write(f"**{task.time}**")
+        c2.write(f"{pet.name}: {task.title}")
+        if c3.button("Done", key=f"do_{task.time}_{task.title}"):
+            task.mark_complete()
+            PetService.atomic_save(owner.to_dict(), DATA_FILE)
+            st.rerun()
+        if c4.button("🗑️", key=f"del_{task.time}_{task.title}"):
+            pet.remove_task(task.title, task.time)
+            PetService.atomic_save(owner.to_dict(), DATA_FILE)
+            st.rerun()
+
+# --- 6. AUDIT LOGS ---
+# Observability: Tracks blocked dangerous tasks
+logs = load_logs(LOG_FILE, st.session_state.get("log_ver", 0))
 if logs:
-    with st.expander("Safety Audit Logs (Historical)"):
+    with st.expander("Safety Audit Logs (RAG History)"):
         st.table(logs)

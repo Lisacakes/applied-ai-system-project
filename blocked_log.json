@@ -4,3 +4,6 @@
 {"task": "Give Lori a bath", "reason": "UNSAFE (AI Connection Error: 404 models/gemini-1.5-flash is not found for API v...)", "pet": "Lori"}
 {"task": "Give Lori grapes", "reason": "UNSAFE (Deterministic Block): Grapes is toxic.", "pet": "Lori"}
 {"task": "Take Lori on walk", "reason": "UNSAFE (AI Connection Error: 404 models/gemini-1.5-flash-latest is not fou...)", "pet": "Lori"}
+{"task": "Take Lori on walk", "reason": "UNSAFE (Infrastructure Error: No compatible Gemini model found)", "pet": "Lori"}
+{"task": "Give Lori a bath", "reason": "UNSAFE (Infrastructure Error: No compatible Gemini model found)", "pet": "Lori"}
+{"task": "Give Lori grapes", "reason": "UNSAFE (Deterministic): Grapes is toxic.", "pet": "Lori"}

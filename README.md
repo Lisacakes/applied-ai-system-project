@@ -194,3 +194,15 @@ One challenge was getting the app to talk to the right AI model. I solved this b
 Reflection
 This project showed me that you cannot rely on AI alone for safety. When lives are at stake, you need hard rules in the code to act as a backup. It taught me how to take a big list of safety policies and turn them into a working system. Solving the connection issues also reminded me that a good engineer has to plan for things to go wrong and make sure the system stays safe no matter what.
 
+Testing Surprises
+What actually surprised me during testing was how fragile the connection between the code and the AI model could be. I expected that once the logic was written, the "handshake" with the AI would be the easy part. Instead, I ran into 404 errors because the model names I was using were slightly different from what the current API expected. It taught me that in a real-world system, you can't just assume the AI is "there"—you have to write code that actively discovers which models are available and handles connection failures gracefully.
+
+Collaborating with AI
+Working alongside an AI to build this project was an eye-opening experience in modern software engineering.
+
+A Helpful Suggestion: When the app kept crashing because of "Duplicate Element Keys," the AI suggested using a unique index and the pet's name to generate distinct keys for every button. This was a great fix because it allowed the schedule to handle multiple similar tasks without breaking the user interface.
+
+A Flawed Suggestion: Earlier in the project, the AI provided code that used a model name that no longer existed in the current API version, leading to repeated 404 errors. I had to investigate the error logs and implement a more robust "Model Discovery" loop to find the correct, working identifier for the Gemini 3 series.
+
+Reflection
+This project taught me that responsible AI requires a "belt and suspenders" approach. You use the AI for its ability to reason and handle complex text, but you keep a layer of traditional, human-written code to handle the most critical safety rules. This balance ensures that technology serves the user without ever putting them at risk.

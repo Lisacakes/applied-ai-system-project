@@ -140,14 +140,57 @@ The system uses a decoupled, three-tier architecture to ensure reliability and s
 * **19/19 Unit Tests Passed:** Verified core OOP logic and Service Layer validation.
 * **Safety Accuracy:** 100% success rate in blocking high-toxicity inputs (Grapes, Chocolate, Lilies) during manual and automated verification.
 
-## Setup Instructions
-1. Clone the repository.
-2. Create a `.env` file and add `GEMINI_API_KEY=your_key_here`.
-3. Install dependencies: `pip install streamlit google-generativeai python-dotenv pytest`.
-4. Run the app: `streamlit run app.py`.
-5. Run tests: `python -m pytest test_final.py test_pawpal.py`.
+Setup Instructions
+To get this app running on your computer, follow these steps:
 
+Download the project folder and open it in your code editor.
 
-![System Architecture](assests/test_success.png)
+Install the necessary tools by typing this in your terminal:
+pip install streamlit google-generativeai python-dotenv
 
+Create a new file named .env in the main folder. Inside that file, paste your API key like this:
+GEMINI_API_KEY=your_key_here
+
+Make sure you have a folder named knowledge_base with a text file inside called pet_safety_rules.txt.
+
+Start the app by typing:
+streamlit run app.py
+
+Sample Interactions
+Example 1: A normal activity
+
+User Input: Morning walk
+
+System Output: Added 'Morning walk'!
+
+What happened: The system checked the rulebook and found no issues with walking at that time.
+
+Example 2: A dangerous food
+
+User Input: Feed Lori grapes
+
+System Output: UNSAFE (Deterministic Block): Grape is toxic to dogs.
+
+What happened: The code instantly recognized "grape" as a toxin and blocked it before even asking the AI.
+
+Example 3: A weather risk
+
+User Input: Walk Lori in 100°F
+
+System Output: UNSAFE: High temperature detected in rules.
+
+What happened: The AI read the specific temperature rules in the text file and flagged the heat as a danger.
+
+Design Decisions
+I built this using a two layer safety approach. The first layer is a simple list of toxic items. If the app sees a word like chocolate or grapes, it stops the task immediately. I did this because it is faster and more reliable than waiting for an AI to think.
+
+The second layer uses the Gemini AI. This layer reads my custom rulebook to handle more complicated situations, like weather or specific health needs. A major decision I made was to have the app fail closed. This means if the internet goes out or the AI makes a mistake, the app assumes the task is unsafe just to be careful. I believe it is better to block a safe walk than to accidentally allow a dangerous meal.
+
+Testing Summary
+The hybrid system worked well because it caught words like raisin bread that a basic search might miss. I also fixed a bug where the app would crash if you tried to add the same task twice.
+
+One challenge was getting the app to talk to the right AI model. I solved this by adding a discovery feature that lets the code find the correct model version automatically. This makes the app much more stable and less likely to break if the AI provider changes something.
+
+Reflection
+This project showed me that you cannot rely on AI alone for safety. When lives are at stake, you need hard rules in the code to act as a backup. It taught me how to take a big list of safety policies and turn them into a working system. Solving the connection issues also reminded me that a good engineer has to plan for things to go wrong and make sure the system stays safe no matter what.
 

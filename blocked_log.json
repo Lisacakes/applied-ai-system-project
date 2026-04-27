@@ -7,3 +7,5 @@
 {"task": "Take Lori on walk", "reason": "UNSAFE (Infrastructure Error: No compatible Gemini model found)", "pet": "Lori"}
 {"task": "Give Lori a bath", "reason": "UNSAFE (Infrastructure Error: No compatible Gemini model found)", "pet": "Lori"}
 {"task": "Give Lori grapes", "reason": "UNSAFE (Deterministic): Grapes is toxic.", "pet": "Lori"}
+{"task": "Give Lori grapes", "reason": "UNSAFE (Deterministic Block): Grapes is toxic.", "pet": "Lori"}
+{"task": "Give Cami raisins", "reason": "UNSAFE (Deterministic Block): Raisins is toxic.", "pet": "Cami"}

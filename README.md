@@ -119,7 +119,7 @@ Testing Summary: I implemented a suite of unit tests for input normalization and
 #PawPal+ Pro: Applied AI Pet Safety System
 
 ## Demo Video
-[REPLACE THIS WITH YOUR LOOM LINK]
+[![Watch the Demo](https://www.loom.com/share/ab7d718a12df470abc6e6b5da3ed8ced)]
 
 ## Project Background
 **Original Project:** PawPal+ (Modules 1-3)

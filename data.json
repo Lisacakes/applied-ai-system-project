@@ -4,37 +4,15 @@
     {
       "name": "Lori",
       "species": "Dog",
+      "tasks": []
+    },
+    {
+      "name": "Cami",
+      "species": "Dog",
       "tasks": [
         {
-          "title": "Give Lori food",
+          "title": "Morning walk",
           "time": "08:00",
-          "duration_minutes": 30,
-          "priority": "medium",
-          "frequency": "once",
-          "completed": false,
-          "due_date": "2026-04-27"
-        },
-        {
-          "title": "Give Lori food",
-          "time": "08:00",
-          "duration_minutes": 30,
-          "priority": "medium",
-          "frequency": "once",
-          "completed": false,
-          "due_date": "2026-04-27"
-        },
-        {
-          "title": "Give Lori a bath",
-          "time": "09:00",
-          "duration_minutes": 30,
-          "priority": "medium",
-          "frequency": "once",
-          "completed": false,
-          "due_date": "2026-04-27"
-        },
-        {
-          "title": "Give Lori a bath",
-          "time": "10:00",
           "duration_minutes": 30,
           "priority": "medium",
           "frequency": "once",
